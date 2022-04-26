@@ -1,15 +1,26 @@
+process.env.NODE_ENV = 'test';
+
 const db = require("../db");
 const User = require("../models/user");
 const Message = require("../models/message");
+const { BCRYPT_WORK_FACTOR } = require("../config");
+const bcrypt = require("bcrypt");
 
+const password = 'password';
+let hashedPwd;
 
 describe("Test User class", function () {
+  beforeAll(async () => {
+    const hashedPwd = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
+  });
+
   beforeEach(async function () {
     await db.query("DELETE FROM messages");
     await db.query("DELETE FROM users");
+
     let u = await User.register({
       username: "test",
-      password: "password",
+      password: password,
       first_name: "Test",
       last_name: "Testy",
       phone: "+14155550000",
@@ -19,7 +30,7 @@ describe("Test User class", function () {
   test("can register", async function () {
     let u = await User.register({
       username: "joel",
-      password: "password",
+      password: password,
       first_name: "Joel",
       last_name: "Burton",
       phone: "+14155551212",
@@ -30,7 +41,7 @@ describe("Test User class", function () {
   });
 
   test("can authenticate", async function () {
-    let isValid = await User.authenticate("test", "password");
+    let isValid = await User.authenticate("test", password);
     expect(isValid).toBeTruthy();
 
     isValid =  await User.authenticate("test", "xxx");
@@ -50,7 +61,7 @@ describe("Test User class", function () {
 
   test("can get", async function () {
     User.updateLoginTimestamp("test");
-    
+
     let u = await User.get("test");
     expect(u).toEqual({
       username: "test",
@@ -81,14 +92,14 @@ describe("Test messages part of User class", function () {
 
     let u1 = await User.register({
       username: "test1",
-      password: "password",
+      password: password,
       first_name: "Test1",
       last_name: "Testy1",
       phone: "+14155550000",
     });
     let u2 = await User.register({
       username: "test2",
-      password: "password",
+      password: password,
       first_name: "Test2",
       last_name: "Testy2",
       phone: "+14155552222",

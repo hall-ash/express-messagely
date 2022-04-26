@@ -11,7 +11,7 @@ function authenticateJWT(req, res, next) {
     const payload = jwt.verify(tokenFromBody, SECRET_KEY);
     req.user = payload; // create a current user
     return next();
-  } catch (err) {
+  } catch (err) { // catch JsonWebTokenError here, but don't return err to front-end
     return next();
   }
 }
